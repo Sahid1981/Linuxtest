@@ -65,6 +65,24 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) does the following:
 - Update the workflow as needed for your project structure.
 - Ensure your server has Docker and Docker Compose installed.
 
+## Local environment file
+
+Copy `.env.example` to `.env` and fill in real values before running the production compose or the deploy action. Example:
+
+```bash
+cp .env.example .env
+# edit .env and set MYSQL_ROOT_PASSWORD and DOCKERHUB_USERNAME
+```
+
+To run the production compose on the server (or locally with a proper `.env`):
+
+```bash
+docker-compose --env-file .env -f docker-compose.prod.yml pull
+docker-compose --env-file .env -f docker-compose.prod.yml up -d
+```
+
+If `DOCKERHUB_USERNAME` is empty, image references like `${DOCKERHUB_USERNAME}/lemp-backend:latest` become invalid and `docker-compose` will fail with `invalid reference format`.
+
 ---
 
 For more details, see the workflow file in `.github/workflows/deploy.yml`.

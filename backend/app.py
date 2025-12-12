@@ -13,7 +13,7 @@ DB_NAME = os.getenv('DB_NAME', 'appdb')
 @app.get('/api/health')
 def health():
     return jsonify(message={'status': 'ok'})
-
+#ju
 @app.get('/api/time')
 def time():
     # Placeholder for actual time fetching logic

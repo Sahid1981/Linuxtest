@@ -74,7 +74,7 @@ cp .env.example .env
 # edit .env and set MYSQL_ROOT_PASSWORD and DOCKERHUB_USERNAME
 ```
 
-To run the production compose on the server (or locally with a proper `.env`):
+xTo run the production compose on the server (or locally with a proper `.env`):
 
 ```bash
 docker-compose --env-file .env -f docker-compose.prod.yml pull

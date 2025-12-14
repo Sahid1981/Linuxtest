@@ -1,21 +1,47 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Containerized LEMP Example</title>
+  <meta charset="utf-8" />
+  <title>Containerized LEMP Example</title>
 </head>
 <body>
-    <h1>Frontend (Nginx)</h1>
-    <div id="msg">Loading...</div>
-    <script>
-        fetch('/api')
-            .then(r => r.json())
-            .then(d => { document.getElementById('msg').innerText = d.message; }) 
-            .catch(e => { document.getElementById('msg').innerText = 'API error: ' + e; });
-        fetch('/api/health')
-            .then(r => r.json())
-            .then(d => { document.getElementById('msg').innerText = d.message; })
-            .catch(e => { document.getElementById('msg').innerText = 'API error: ' + e; });
-    </script>
+  <h1>Frontend (Nginx)</h1>
+
+  <h2>Health</h2>
+  <div id="health">Loading...</div>
+
+  <h2>Time</h2>
+  <div id="time">Loading...</div>
+
+  <script>
+    async function load() {
+      try {
+        // 1) Health
+        const hr = await fetch('/api/health');
+        if (!hr.ok) throw new Error('Health HTTP ' + hr.status);
+        const hd = await hr.json();
+
+        // Koska palautat message: {status: "ok"}
+        document.getElementById('health').innerText =
+          'status: ' + (hd.message?.status ?? JSON.stringify(hd));
+
+        // 2) Time
+        const tr = await fetch('/api/time');
+        if (!tr.ok) throw new Error('Time HTTP ' + tr.status);
+        const td = await tr.json();
+
+        // Koska palautat message: {time: "..."}
+        document.getElementById('time').innerText =
+          'time: ' + (td.message?.time ?? JSON.stringify(td));
+
+      } catch (e) {
+        document.getElementById('health').innerText = 'API error: ' + e;
+        document.getElementById('time').innerText = 'API error: ' + e;
+      }
+    }
+
+    load();
+  </script>
 </body>
 </html>

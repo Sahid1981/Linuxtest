@@ -3,10 +3,13 @@ services:
   db:
     image: mysql:8.4
     environment:
+      #toin kaikki muuttujat jotta mysgl toimisi oikein
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+      #vaihdetaan aikavyöhyke helsinkiin
+      TZ: Europe/Helsinki
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:

@@ -18,7 +18,7 @@
     async function load() {
       try {
         // 1) Health
-        const hr = await fetch('/api/health');
+        const hr = await fetch('/cicd/api/health');
         if (!hr.ok) throw new Error('Health HTTP ' + hr.status);
         const hd = await hr.json();
 
@@ -27,7 +27,7 @@
           'status: ' + (hd.message?.status ?? JSON.stringify(hd));
 
         // 2) Time
-        const tr = await fetch('/api/time');
+        const tr = await fetch('/cicd/api/time');
         if (!tr.ok) throw new Error('Time HTTP ' + tr.status);
         const td = await tr.json();
 

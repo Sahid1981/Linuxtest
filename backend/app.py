@@ -44,6 +44,53 @@ def index():
     row = cur.fetchone()
     cur.close(); conn.close()
     return jsonify(message=row[0])
+@app.route('/api/diary/add', methods=['POST'])
+def add_diary_entry():
+    try:
+        data = request.get_json()
+        
+        if not data or not all(k in data for k in ['date', 'title', 'content']):
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO diary_entries (date, title, content)
+            VALUES (%s, %s, %s)
+        """, (data['date'], data['title'], data['content']))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Diary entry added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/diary/entries')
+def get_diary_entries():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT date, title, content FROM diary_entries
+            ORDER BY date DESC, created_at DESC
+        """)
+        entries = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Format dates for display
+        for entry in entries:
+            if isinstance(entry['date'], bytes):
+                entry['date'] = entry['date'].decode('utf-8')
+            else:
+                entry['date'] = str(entry['date'])
+        
+        return jsonify(entries)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     # Dev-only fallback

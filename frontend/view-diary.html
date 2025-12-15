@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Päiväkirja merkinnät</title>
+    <base href="/kube/">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .entry {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 15px 0;
+            background: #f9f9f9;
+        }
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 10px;
+        }
+        .entry-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .entry-date {
+            color: #666;
+            font-size: 14px;
+        }
+        .entry-content {
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .no-entries {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Takaisin etusivulle</a>
+        
+        <h1>Päiväkirja merkinnät</h1>
+        
+        <div id="loading">Ladataan merkintöjä...</div>
+        <div id="entries"></div>
+    </div>
+
+    <script>
+        async function loadEntries() {
+            const loadingDiv = document.getElementById('loading');
+            const entriesDiv = document.getElementById('entries');
+
+            try {
+                const response = await fetch('api/diary/entries');
+                const data = await response.json();
+
+                loadingDiv.style.display = 'none';
+
+                if (response.ok && data.length > 0) {
+                    entriesDiv.innerHTML = '';
+                    data.forEach(entry => {
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = 'entry';
+                        entryDiv.innerHTML = `
+                            <div class="entry-header">
+                                <div>
+                                    <div class="entry-title">${escapeHtml(entry.title)}</div>
+                                    <div class="entry-date">${entry.date}</div>
+                                </div>
+                            </div>
+                            <div class="entry-content">${escapeHtml(entry.content)}</div>
+                        `;
+                        entriesDiv.appendChild(entryDiv);
+                    });
+                } else {
+                    entriesDiv.innerHTML = '<div class="no-entries">Ei merkintöjä. <a href="diary.html">Luo uusi merkintä</a></div>';
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                entriesDiv.innerHTML = '<div class="no-entries">Virhe merkintöjen lataamisessa: ' + error.message + '</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load entries when page loads
+        loadEntries();
+    </script>
+</body>
+</html>

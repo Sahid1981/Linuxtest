@@ -13,6 +13,11 @@
 
   <h2>Time</h2>
   <div id="time">Loading...</div>
+          <div class="section">
+            <h3>Päiväkirja</h3>
+            <button class="diary-button" onclick="openNewEntry()">Uusi päiväkirja merkintä</button>
+            <button class="diary-button" onclick="viewEntries()">Katso päiväkirja merkintöjä</button>
+        </div>
 
   <script>
     async function load() {
@@ -40,7 +45,13 @@
         document.getElementById('time').innerText = 'API error: ' + e;
       }
     }
+            function openNewEntry() {
+            window.location.href = 'diary.html';
+        }
 
+        function viewEntries() {
+            window.location.href = 'view-diary.html';
+        }
     load();
   </script>
 </body>

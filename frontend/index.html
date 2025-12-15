@@ -15,6 +15,7 @@
   <div id="time">Loading...</div>
           <div class="section">
             <h3>Päiväkirja</h3>
+            <button onclick="initDB()">Initialize Database</button>
             <button class="diary-button" onclick="openNewEntry()">Uusi päiväkirja merkintä</button>
             <button class="diary-button" onclick="viewEntries()">Katso päiväkirja merkintöjä</button>
         </div>
@@ -45,6 +46,15 @@
         document.getElementById('time').innerText = 'API error: ' + e;
       }
     }
+        async function initDB() {
+            try {
+                const response = await fetch('api/init-db');
+                const data = await response.json();
+                resultDiv.textContent = 'DB Init: ' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
             function openNewEntry() {
             window.location.href = '/cicd/diary.html';
         }

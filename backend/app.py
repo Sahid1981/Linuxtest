@@ -50,6 +50,40 @@ def index():
             cur.close()
         if 'conn' in locals():
             conn.close()
+
+@app.route('/api/init-db')
+def init_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100),
+                email VARCHAR(100)
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS diary_entries (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                date DATE NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                content LONGTEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("""
+            INSERT INTO users (name, email) VALUES
+            ('John Doe', 'john@example.com'),
+            ('Jane Smith', 'jane@example.com')
+        """)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"message": "Database initialized"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/diary/add', methods=['POST'])
 def add_diary_entry():
     try:
@@ -67,14 +101,12 @@ def add_diary_entry():
         """, (data['date'], data['title'], data['content']))
         
         conn.commit()
+        cursor.close()
+        conn.close()
+        
         return jsonify({"message": "Diary entry added successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
 
 @app.route('/api/diary/entries')
 def get_diary_entries():
@@ -86,6 +118,8 @@ def get_diary_entries():
             ORDER BY date DESC, created_at DESC
         """)
         entries = cursor.fetchall()
+        cursor.close()
+        conn.close()
         
         # Format dates for display
         for entry in entries:
@@ -97,11 +131,6 @@ def get_diary_entries():
         return jsonify(entries)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
 
 if __name__ == '__main__':
     # Dev-only fallback

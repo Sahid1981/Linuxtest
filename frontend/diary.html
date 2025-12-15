@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uusi päiväkirja merkintä</title>
+    <base href="/cicd/">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -132,7 +133,7 @@
             const content = document.getElementById('content').value;
 
             try {
-                const response = await fetch('/api/diary/add', {
+                const response = await fetch('api/diary/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -167,7 +168,7 @@
         });
 
         function goBack() {
-            window.location.href = '/index.html';
+            window.location.href = 'index.html';
         }
     </script>
 </body>

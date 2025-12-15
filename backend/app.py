@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import os
 import mysql.connector
 
@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 def get_db_connection():
     return mysql.connector.connect(
-        host=os.getenv('DB_HOST', 'mysql'),
+        host=os.getenv('DB_HOST', 'db'),
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD'),
         database=os.getenv('DB_NAME')
@@ -20,24 +20,36 @@ def health():
 #ju
 @app.get('/api/time')
 def time():
-    # Placeholder for actual time fetching logic
-    #get server time from db
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT NOW()")
-    row = cur.fetchone()
-    cur.close(); conn.close()
-    return jsonify(message={'time': row[0]})
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT NOW()")
+        row = cur.fetchone()
+        return jsonify(message={'time': str(row[0])})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
 
 @app.get('/api')
 def index():
     """Simple endpoint that greets from DB."""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT 'Hello from MySQL via Testi!'")
-    row = cur.fetchone()
-    cur.close(); conn.close()
-    return jsonify(message=row[0])
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 'Hello from MySQL via Testi!'")
+        row = cur.fetchone()
+        return jsonify(message=row[0])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
 @app.route('/api/diary/add', methods=['POST'])
 def add_diary_entry():
     try:
@@ -55,12 +67,14 @@ def add_diary_entry():
         """, (data['date'], data['title'], data['content']))
         
         conn.commit()
-        cursor.close()
-        conn.close()
-        
         return jsonify({"message": "Diary entry added successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 @app.route('/api/diary/entries')
 def get_diary_entries():
@@ -72,8 +86,6 @@ def get_diary_entries():
             ORDER BY date DESC, created_at DESC
         """)
         entries = cursor.fetchall()
-        cursor.close()
-        conn.close()
         
         # Format dates for display
         for entry in entries:
@@ -85,6 +97,11 @@ def get_diary_entries():
         return jsonify(entries)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 if __name__ == '__main__':
     # Dev-only fallback

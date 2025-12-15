@@ -5,10 +5,14 @@ import mysql.connector
 #flask app instance update joo
 app = Flask(__name__)
 
-DB_HOST = os.getenv('DB_HOST', 'db')
-DB_USER = os.getenv('DB_USER', 'appuser')
-DB_PASSWORD = os.getenv('DB_PASSWORD', 'changeme')
-DB_NAME = os.getenv('DB_NAME', 'appdb')
+def get_db_connection():
+    return mysql.connector.connect(
+        host=os.getenv('DB_HOST', 'mysql'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        database=os.getenv('DB_NAME')
+    )
+
 
 @app.get('/api/health')
 def health():
@@ -18,12 +22,7 @@ def health():
 def time():
     # Placeholder for actual time fetching logic
     #get server time from db
-    conn = mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-    )
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT NOW()")
     row = cur.fetchone()
@@ -33,12 +32,7 @@ def time():
 @app.get('/api')
 def index():
     """Simple endpoint that greets from DB."""
-    conn = mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-    )
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT 'Hello from MySQL via Testi!'")
     row = cur.fetchone()
